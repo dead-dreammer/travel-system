@@ -63,6 +63,7 @@ module "lambda" {
   vpc_id                  = module.vpc.vpc_id
   private_subnet_ids      = module.vpc.private_subnet_ids
   lambda_security_group_id = module.vpc.lambda_security_group_id
+  duffel_api_key          = var.duffel_api_key
 }
 
 module "api_gateway" {
@@ -78,6 +79,16 @@ module "api_gateway" {
   documents_lambda_invoke_arn = module.lambda.documents_invoke_arn
   advisories_lambda_invoke_arn = module.lambda.advisories_invoke_arn
   reports_lambda_invoke_arn   = module.lambda.reports_invoke_arn
+  flight_search_lambda_invoke_arn = module.lambda.flight_search_invoke_arn
+
+  requests_lambda_function_name   = module.lambda.requests_function_name
+  approvals_lambda_function_name  = module.lambda.approvals_function_name
+  bookings_lambda_function_name   = module.lambda.bookings_function_name
+  expenses_lambda_function_name   = module.lambda.expenses_function_name
+  documents_lambda_function_name  = module.lambda.documents_function_name
+  advisories_lambda_function_name = module.lambda.advisories_function_name
+  reports_lambda_function_name    = module.lambda.reports_function_name
+  flight_search_lambda_function_name = module.lambda.flight_search_function_name
 }
 
 module "eventbridge" {

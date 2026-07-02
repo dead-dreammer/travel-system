@@ -12,3 +12,4 @@ variable "notifications_queue_url"  {}
 variable "vpc_id"                   {}
 variable "private_subnet_ids"       { type = list(string) }
 variable "lambda_security_group_id" {}
+variable "duffel_api_key"           { sensitive = true; default = "" }

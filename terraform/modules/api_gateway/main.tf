@@ -14,12 +14,12 @@ resource "aws_api_gateway_authorizer" "cognito" {
 
 locals {
   routes = {
-    "travel-requests"   = { lambda_arn = var.requests_lambda_invoke_arn,  has_id = true }
-    "approvals"         = { lambda_arn = var.approvals_lambda_invoke_arn, has_id = true }
-    "bookings"          = { lambda_arn = var.bookings_lambda_invoke_arn,  has_id = false }
-    "expenses"          = { lambda_arn = var.expenses_lambda_invoke_arn,  has_id = true }
-    "documents"         = { lambda_arn = var.documents_lambda_invoke_arn, has_id = false }
-    "advisories"        = { lambda_arn = var.advisories_lambda_invoke_arn,has_id = true }
+    "travel-requests"   = { lambda_arn = var.requests_lambda_invoke_arn,  function_name = var.requests_lambda_function_name,  has_id = true }
+    "approvals"         = { lambda_arn = var.approvals_lambda_invoke_arn, function_name = var.approvals_lambda_function_name, has_id = true }
+    "bookings"          = { lambda_arn = var.bookings_lambda_invoke_arn,  function_name = var.bookings_lambda_function_name,  has_id = false }
+    "expenses"          = { lambda_arn = var.expenses_lambda_invoke_arn,  function_name = var.expenses_lambda_function_name,  has_id = true }
+    "documents"         = { lambda_arn = var.documents_lambda_invoke_arn, function_name = var.documents_lambda_function_name, has_id = false }
+    "advisories"        = { lambda_arn = var.advisories_lambda_invoke_arn,function_name = var.advisories_lambda_function_name,has_id = true }
   }
 }
 
@@ -48,6 +48,18 @@ resource "aws_api_gateway_integration" "proxy" {
   integration_http_method = "POST"
   type                    = "AWS_PROXY"
   uri                     = each.value.lambda_arn
+}
+
+# Grants API Gateway permission to invoke each Lambda. Without this, every
+# route above returns an authorization error at invoke time regardless of
+# how the integration is wired.
+resource "aws_lambda_permission" "proxy" {
+  for_each      = local.routes
+  statement_id  = "AllowAPIGatewayInvoke-${each.key}"
+  action        = "lambda:InvokeFunction"
+  function_name = each.value.function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
 }
 
 # Reports sub-resources
@@ -80,11 +92,58 @@ resource "aws_api_gateway_integration" "reports_proxy" {
   uri                     = var.reports_lambda_invoke_arn
 }
 
+resource "aws_lambda_permission" "reports" {
+  statement_id  = "AllowAPIGatewayInvoke-reports"
+  action        = "lambda:InvokeFunction"
+  function_name = var.reports_lambda_function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
+}
+
+# Flights sub-resources (flight search)
+resource "aws_api_gateway_resource" "flights" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_rest_api.main.root_resource_id
+  path_part   = "flights"
+}
+
+resource "aws_api_gateway_resource" "flights_proxy" {
+  rest_api_id = aws_api_gateway_rest_api.main.id
+  parent_id   = aws_api_gateway_resource.flights.id
+  path_part   = "{proxy+}"
+}
+
+resource "aws_api_gateway_method" "flights_proxy" {
+  rest_api_id   = aws_api_gateway_rest_api.main.id
+  resource_id   = aws_api_gateway_resource.flights_proxy.id
+  http_method   = "ANY"
+  authorization = "COGNITO_USER_POOLS"
+  authorizer_id = aws_api_gateway_authorizer.cognito.id
+}
+
+resource "aws_api_gateway_integration" "flights_proxy" {
+  rest_api_id             = aws_api_gateway_rest_api.main.id
+  resource_id             = aws_api_gateway_resource.flights_proxy.id
+  http_method             = aws_api_gateway_method.flights_proxy.http_method
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+  uri                     = var.flight_search_lambda_invoke_arn
+}
+
+resource "aws_lambda_permission" "flights" {
+  statement_id  = "AllowAPIGatewayInvoke-flights"
+  action        = "lambda:InvokeFunction"
+  function_name = var.flight_search_lambda_function_name
+  principal     = "apigateway.amazonaws.com"
+  source_arn    = "${aws_api_gateway_rest_api.main.execution_arn}/*/*"
+}
+
 resource "aws_api_gateway_deployment" "main" {
   rest_api_id = aws_api_gateway_rest_api.main.id
   depends_on  = [
     aws_api_gateway_integration.proxy,
     aws_api_gateway_integration.reports_proxy,
+    aws_api_gateway_integration.flights_proxy,
   ]
   lifecycle { create_before_destroy = true }
 }

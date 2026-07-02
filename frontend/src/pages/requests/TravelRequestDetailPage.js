@@ -1,7 +1,12 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { ArrowLeft, Check, X, Clock } from 'lucide-react';
 import api from '../../services/api';
+import FlightSearchPanel from '../../components/bookings/FlightSearchPanel';
+
+const BOOKABLE_STATUSES = ['travel_approved', 'finance_approved', 'booked'];
+const COORDINATOR_ROLES = ['travel_coordinator', 'admin'];
 
 const fmt = (n) => n != null ? 'R ' + Number(n).toLocaleString('en-ZA') : '—';
 const fmtDate = (d) => d ? new Date(d).toLocaleDateString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' }) : '—';
@@ -20,14 +25,19 @@ function Badge({ text, color, bg }) {
 export default function TravelRequestDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const user = useSelector((s) => s.auth.user);
   const [req, setReq] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    api.get(`/travel-requests/${id}`).then(res => {
+  const reload = useCallback(() => {
+    return api.get(`/travel-requests/${id}`).then(res => {
       setReq(res.data.data || res.data);
-    }).finally(() => setLoading(false));
+    });
   }, [id]);
+
+  useEffect(() => {
+    reload().finally(() => setLoading(false));
+  }, [reload]);
 
   if (loading) return <div style={{ padding: 40, textAlign: 'center', color: 'var(--text-muted)' }}>Loading…</div>;
   if (!req) return <div style={{ padding: 40, textAlign: 'center', color: '#dc2626' }}>Request not found.</div>;
@@ -147,6 +157,9 @@ export default function TravelRequestDetailPage() {
                 <div style={{ fontSize: 11, color: 'var(--text-muted)', marginTop: 6 }}>Ref: {f.booking_reference}</div>
               </div>
             ))}
+            {COORDINATOR_ROLES.includes(user?.role) && BOOKABLE_STATUSES.includes(req.status) && (
+              <FlightSearchPanel requestId={req.id} onBooked={reload} />
+            )}
           </div>
 
           {/* Accommodation */}

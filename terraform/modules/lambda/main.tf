@@ -38,6 +38,8 @@ locals {
     SES_FROM_EMAIL       = var.ses_from_email
     COGNITO_USER_POOL_ID = var.cognito_user_pool_id
     QUEUE_URL            = var.notifications_queue_url
+    DUFFEL_API_KEY       = var.duffel_api_key
+    DUFFEL_API_URL       = "https://api.duffel.com"
     AWS_NODEJS_CONNECTION_REUSE_ENABLED = "1"
   }
   vpc_config = {
@@ -143,6 +145,19 @@ resource "aws_lambda_function" "reports" {
   vpc_config { subnet_ids = local.vpc_config.subnet_ids; security_group_ids = local.vpc_config.security_group_ids }
 }
 
+resource "aws_lambda_function" "flight_search" {
+  function_name    = "${var.project_name}-${var.environment}-flight-search"
+  handler          = "src/handlers/flightSearch/index.handler"
+  runtime          = "nodejs20.x"
+  role             = aws_iam_role.lambda.arn
+  filename         = data.archive_file.lambda_zip.output_path
+  source_code_hash = data.archive_file.lambda_zip.output_base64sha256
+  memory_size      = 256
+  timeout          = 15
+  environment { variables = local.common_env }
+  vpc_config { subnet_ids = local.vpc_config.subnet_ids; security_group_ids = local.vpc_config.security_group_ids }
+}
+
 resource "aws_lambda_function" "document_expiry" {
   function_name    = "${var.project_name}-${var.environment}-document-expiry"
   handler          = "src/automation/documentExpiry.handler"
@@ -164,6 +179,7 @@ resource "aws_cloudwatch_log_group" "documents"      { name = "/aws/lambda/${aws
 resource "aws_cloudwatch_log_group" "advisories"     { name = "/aws/lambda/${aws_lambda_function.advisories.function_name}";     retention_in_days = 30 }
 resource "aws_cloudwatch_log_group" "reports"        { name = "/aws/lambda/${aws_lambda_function.reports.function_name}";        retention_in_days = 30 }
 resource "aws_cloudwatch_log_group" "document_expiry"{ name = "/aws/lambda/${aws_lambda_function.document_expiry.function_name}";retention_in_days = 30 }
+resource "aws_cloudwatch_log_group" "flight_search"  { name = "/aws/lambda/${aws_lambda_function.flight_search.function_name}";  retention_in_days = 30 }
 
 output "requests_invoke_arn"   { value = aws_lambda_function.requests.invoke_arn }
 output "approvals_invoke_arn"  { value = aws_lambda_function.approvals.invoke_arn }
@@ -172,5 +188,15 @@ output "expenses_invoke_arn"   { value = aws_lambda_function.expenses.invoke_arn
 output "documents_invoke_arn"  { value = aws_lambda_function.documents.invoke_arn }
 output "advisories_invoke_arn" { value = aws_lambda_function.advisories.invoke_arn }
 output "reports_invoke_arn"    { value = aws_lambda_function.reports.invoke_arn }
+output "flight_search_invoke_arn" { value = aws_lambda_function.flight_search.invoke_arn }
 output "document_expiry_arn"   { value = aws_lambda_function.document_expiry.arn }
 output "document_expiry_name"  { value = aws_lambda_function.document_expiry.function_name }
+
+output "requests_function_name"       { value = aws_lambda_function.requests.function_name }
+output "approvals_function_name"      { value = aws_lambda_function.approvals.function_name }
+output "bookings_function_name"       { value = aws_lambda_function.bookings.function_name }
+output "expenses_function_name"       { value = aws_lambda_function.expenses.function_name }
+output "documents_function_name"      { value = aws_lambda_function.documents.function_name }
+output "advisories_function_name"     { value = aws_lambda_function.advisories.function_name }
+output "reports_function_name"        { value = aws_lambda_function.reports.function_name }
+output "flight_search_function_name"  { value = aws_lambda_function.flight_search.function_name }

@@ -120,4 +120,42 @@ export const MOCK_DATA = {
       { request_number: 'TR-2026-0004', employee_name: 'Amahle Nkosi', violation: 'Hotel rate exceeds policy limit by R200/night', severity: 'low' },
     ],
   },
+  '/flights/search': {
+    offer_request_id: 'orq_mock_0001',
+    offers: [
+      {
+        id: 'off_mock_0001',
+        total_amount: '3420.00',
+        total_currency: 'ZAR',
+        slices: [
+          { connections: 0, segments: [
+            { airline: 'FlySafair', flight_number: 'FA101', origin: 'JNB', destination: 'CPT', departing_at: '2026-07-15T06:30:00', arriving_at: '2026-07-15T08:45:00', cabin_class: 'economy' },
+          ] },
+        ],
+      },
+      {
+        id: 'off_mock_0002',
+        total_amount: '4180.00',
+        total_currency: 'ZAR',
+        slices: [
+          { connections: 0, segments: [
+            { airline: 'British Airways (Comair)', flight_number: 'BA6234', origin: 'JNB', destination: 'CPT', departing_at: '2026-07-15T09:15:00', arriving_at: '2026-07-15T11:30:00', cabin_class: 'economy' },
+          ] },
+        ],
+      },
+      {
+        id: 'off_mock_0003',
+        total_amount: '3980.00',
+        total_currency: 'ZAR',
+        slices: [
+          { connections: 0, segments: [
+            { airline: 'FlySafair', flight_number: 'FA112', origin: 'JNB', destination: 'CPT', departing_at: '2026-07-15T14:00:00', arriving_at: '2026-07-15T16:15:00', cabin_class: 'economy' },
+          ] },
+          { connections: 0, segments: [
+            { airline: 'FlySafair', flight_number: 'FA209', origin: 'CPT', destination: 'JNB', departing_at: '2026-07-17T18:00:00', arriving_at: '2026-07-17T20:15:00', cabin_class: 'economy' },
+          ] },
+        ],
+      },
+    ],
+  },
 };
