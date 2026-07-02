@@ -1,0 +1,84 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --primary:       #1a365d;
+  --primary-light: #2a4a7f;
+  --accent:        #2b6cb0;
+  --accent-hover:  #2c5282;
+  --secondary:     #744210;
+  --success:       #276749;
+  --danger:        #822727;
+  --warning:       #d69e2e;
+  --bg:            #f7fafc;
+  --surface:       #ffffff;
+  --border:        #e2e8f0;
+  --text:          #2d3748;
+  --text-muted:    #718096;
+  --radius:        6px;
+  --shadow:        0 1px 3px rgba(0,0,0,.1), 0 1px 2px rgba(0,0,0,.06);
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+a { color: var(--accent); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+button {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 14px;
+  border: none;
+  border-radius: var(--radius);
+  transition: background .15s, opacity .15s;
+}
+
+input, select, textarea {
+  font-family: inherit;
+  font-size: 14px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 12px;
+  width: 100%;
+  outline: none;
+  background: var(--surface);
+  color: var(--text);
+  transition: border-color .15s;
+}
+input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+
+table { width: 100%; border-collapse: collapse; }
+th { text-align: left; font-weight: 600; color: var(--text-muted); font-size: 12px; text-transform: uppercase; letter-spacing: .05em; padding: 10px 12px; border-bottom: 2px solid var(--border); }
+td { padding: 10px 12px; border-bottom: 1px solid var(--border); }
+tr:last-child td { border-bottom: none; }
+tr:hover td { background: #f8fafc; }
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 8px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+.badge-green  { background: #c6f6d5; color: #276749; }
+.badge-red    { background: #fed7d7; color: #822727; }
+.badge-yellow { background: #fefcbf; color: #744210; }
+.badge-blue   { background: #bee3f8; color: #2a4365; }
+.badge-grey   { background: #edf2f7; color: #4a5568; }
+.badge-teal   { background: #b2f5ea; color: #234e52; }
+.badge-orange { background: #feebc8; color: #7b341e; }
+
+/* Legacy aliases */
+.badge-success { background: #c6f6d5; color: #276749; }
+.badge-warning { background: #fefcbf; color: #744210; }
+.badge-danger  { background: #fed7d7; color: #822727; }
+.badge-info    { background: #bee3f8; color: #2a4365; }
+.badge-default { background: #edf2f7; color: #4a5568; }

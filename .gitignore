@@ -1,0 +1,13 @@
+node_modules/
+.env
+.env.local
+.env.production
+build/
+dist/
+*.zip
+.terraform/
+terraform.tfstate
+terraform.tfstate.backup
+*.tfvars
+.DS_Store
+coverage/
